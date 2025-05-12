@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  solr:
+    build:
+      context: .
+      dockerfile: Dockerfile.solr
+    container_name: solr_container
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./solr/searchcore:/var/solr/data/searchcore
+    command:
+      - solr-precreate
+      - searchcore
+
+  api:
+    build: ./backend
+    container_name: api_container
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - ./backend/uploads:/app/uploads
+    working_dir: /app
+    command: node index.js
+    depends_on:
+      - solr
+
+  frontend:
+    build: ./frontend
+    container_name: frontend_container
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: npm start
+    depends_on:
+      - api
+    stdin_open: true
+    tty: true

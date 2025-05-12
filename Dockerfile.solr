@@ -1,0 +1,37 @@
+FROM solr:8.11.4
+
+USER root
+
+# Create necessary directories if they don't exist
+RUN mkdir -p /opt/solr/contrib/extraction/lib
+WORKDIR /opt/solr
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y wget
+
+# Download Solr Cell and its dependencies (using matching versions)
+RUN wget -q https://repo1.maven.org/maven2/org/apache/solr/solr-cell/8.11.4/solr-cell-8.11.4.jar -P /opt/solr/contrib/extraction/
+RUN wget -q https://repo1.maven.org/maven2/org/apache/tika/tika-core/1.28.3/tika-core-1.28.3.jar -P /opt/solr/contrib/extraction/lib/
+RUN wget -q https://repo1.maven.org/maven2/org/apache/tika/tika-parsers/1.28.3/tika-parsers-1.28.3.jar -P /opt/solr/contrib/extraction/lib/
+
+# Download the missing xerces dependency
+RUN wget -q https://repo1.maven.org/maven2/xerces/xercesImpl/2.12.2/xercesImpl-2.12.2.jar -P /opt/solr/contrib/extraction/lib/
+RUN wget -q https://repo1.maven.org/maven2/xml-apis/xml-apis/1.4.01/xml-apis-1.4.01.jar -P /opt/solr/contrib/extraction/lib/
+
+# Download additional necessary parsers for PDFs, etc.
+RUN wget -q https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.26/pdfbox-2.0.26.jar -P /opt/solr/contrib/extraction/lib/
+RUN wget -q https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.26/fontbox-2.0.26.jar -P /opt/solr/contrib/extraction/lib/
+RUN wget -q https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar -P /opt/solr/contrib/extraction/lib/
+RUN wget -q https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar -P /opt/solr/contrib/extraction/lib/
+
+# Add all JAR files to the classpath in solrconfig.xml
+RUN mkdir -p /var/solr/data/searchcore/conf/
+COPY solrconfig.xml /var/solr/data/searchcore/conf/
+
+# Fix permissions
+RUN chown -R solr:solr /opt/solr/contrib /var/solr/data
+
+USER solr
+
+# Create core on startup if it doesn't exist
+CMD ["solr-precreate", "searchcore"]
