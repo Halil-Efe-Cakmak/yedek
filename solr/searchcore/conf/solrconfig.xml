@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
+
   <luceneMatchVersion>8.11.4</luceneMatchVersion>
 
-  <!-- CLASSIC schema (schema.xml) tanımı -->
-  <schemaFactory class="ClassicIndexSchemaFactory"/>
-
-  <!-- Gerekli JAR kütüphaneleri (Tika, Solr Cell) -->
+  <!-- Gerekli jar klasörleri -->
   <lib dir="/opt/solr/contrib/extraction" regex=".*\.jar" />
   <lib dir="/opt/solr/dist" regex=".*\.jar" />
 
-  <directoryFactory name="DirectoryFactory" class="solr.StandardDirectoryFactory"/>
-  <codecFactory class="solr.SchemaCodecFactory"/>
+  <!-- Dizin ayarları -->
+  <directoryFactory name="DirectoryFactory" class="solr.StandardDirectoryFactory" />
+  <codecFactory class="solr.SchemaCodecFactory" />
 
+  <!-- Güncelleme yöneticisi -->
   <updateHandler class="solr.DirectUpdateHandler2">
     <updateLog>
       <str name="dir">${solr.ulog.dir:}</str>
@@ -25,11 +25,12 @@
     </autoSoftCommit>
   </updateHandler>
 
+  <!-- Sorgu önbelleği ayarları -->
   <query>
     <maxBooleanClauses>1024</maxBooleanClauses>
-    <filterCache size="512" initialSize="512" autowarmCount="0"/>
-    <queryResultCache size="512" initialSize="512" autowarmCount="0"/>
-    <documentCache size="512" initialSize="512" autowarmCount="0"/>
+    <filterCache size="512" initialSize="512" autowarmCount="0" />
+    <queryResultCache size="512" initialSize="512" autowarmCount="0" />
+    <documentCache size="512" initialSize="512" autowarmCount="0" />
     <enableLazyFieldLoading>true</enableLazyFieldLoading>
     <queryResultWindowSize>20</queryResultWindowSize>
     <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
@@ -44,7 +45,7 @@
     </lst>
   </requestHandler>
 
-  <!-- Dosya içeriği yükleme (Solr Cell) -->
+  <!-- Solr Cell ile dosya yükleme için -->
   <requestHandler name="/update/extract" class="solr.extraction.ExtractingRequestHandler">
     <lst name="defaults">
       <str name="lowernames">true</str>
@@ -54,4 +55,5 @@
     </lst>
     <requestParsers enableMultipart="true" multipartUploadLimitInKB="20480" />
   </requestHandler>
+
 </config>
